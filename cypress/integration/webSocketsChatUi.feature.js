@@ -27,13 +27,30 @@ describe("WebSocket Chat", () => {
     it("is expected to show the chat", () => {
       cy.get("#chat").should("be.visible");
     });
+  
+    describe('on incoming message', () => {      
+      it("is expected to display an the message", () => {
+        cy.incommingMessage(wsServer, {
+          nick: "Elvita",
+          body: "Hi Thomas, this is interesting!",
+        });
+        cy.get('#messages').should('contain.text', "Elvita: Hi Thomas, this is interesting!")
+      });
+    });
+    
+    describe('on outgoing message', () => {
+
+      before(() => {
+        cy.get('#message-input').type('Hell yeah!')
+        cy.get('#send-message').click()
+      });
+
+      it.only('is expected to display the message', () => {
+        cy.get('#messages').should('contain.text', "Thomas: Hell yeah!")
+
+      });
+    });
+
   });
 
-  // it("is expected to display an incomming message", () => {
-  //   cy.incommingMessage(wsServer, {
-  //     nick: "Elvita",
-  //     message: "Hi Thomas, this is interesting!",
-  //   });
-  //   cy.get('#messages').should('contain.text', "Elvita: Hi Thomas, this is interesting!")
-  // });
 });
