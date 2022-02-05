@@ -24,15 +24,15 @@
   <script>
     let nickname;
 
-    const connection = new WebSocket("ws://localhost:8080");
+    const connection = new WebSocket("wss://efe5-81-229-73-67.ngrok.io");
     const nickSection = document.getElementById("nickname");
     const nickInput = document.getElementById("nick");
     const setNickButton = document.getElementById("set-nick-button");
     const chatSection = document.getElementById("chat");
     const flashMessageElelement = document.getElementById("flash-message");
     const messagesElement = document.getElementById("messages");
-    const setMessageInput = document.getElementById('message-input')
-    const sendMessageButton = document.getElementById('send-message')
+    const setMessageInput = document.getElementById("message-input");
+    const sendMessageButton = document.getElementById("send-message");
 
     chatSection.style.display = "none";
 
@@ -45,22 +45,23 @@
       }
     });
 
-    sendMessageButton.addEventListener('click', () => {
-      let message = setMessageInput.value
-      connection.send(JSON.stringify({nick: nickname, body: message}))
-      setMessageInput.value = ''
-    })
+    sendMessageButton.addEventListener("click", () => {
+      let message = setMessageInput.value;
+      connection.send(JSON.stringify({ nick: nickname, body: message }));
+      setMessageInput.value = "";
+    });
 
     connection.addEventListener("open", (conn) => {});
 
-    connection.addEventListener("message", (incomingMessage) => {
+    connection.addEventListener("message", async (incomingMessage) => {
       let newMessage = document.createElement("div");
       let message, messageBody;
-      if (isParsableJson(incomingMessage.data)) {
-        message = JSON.parse(incomingMessage.data);
+      if (incomingMessage.data.constructor.name === "Blob") {
+        message = await new Response(incomingMessage.data).text();
+        message = JSON.parse(message);
         messageBody = `${message.nick}: ${message.body}`;
       } else {
-        messageBody = incomingMessage.data
+        messageBody = incomingMessage.data;
       }
       newMessage.innerHTML = `<p>${messageBody}</p>`;
       messagesElement.appendChild(newMessage);
